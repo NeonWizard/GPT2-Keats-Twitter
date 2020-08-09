@@ -1,0 +1,2 @@
+gpt_2_simple==0.7.1
+twython==3.8.2
