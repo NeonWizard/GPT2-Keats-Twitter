@@ -41,6 +41,7 @@ class Bot:
 		# separate poem into 280 or less character tweets
 		tweets = [[]]
 		for line in lines:
+			if not line or line.isspace(): continue
 			if len("\n".join(tweets[-1]))+len(line) < 280:
 				tweets[-1].append(line)
 			else:
@@ -48,7 +49,8 @@ class Bot:
 
 		# post each tweet and chain into a thread
 		# TODO: rare error where twitter post is too long, investigate further.
-		parent_tweet = self.twitter.update_status(status="\n".join(tweets.pop(0)))
+		tweet_content = "\n".join(tweets.pop(0))
+		parent_tweet = self.twitter.update_status(status=tweet_content)
 		for tweet in tweets:
 			tweet_content = "@{} {}".format(self.twitter_screen_name, "\n".join(tweet))
 			parent_tweet = self.twitter.update_status(status=tweet_content, in_reply_to_status_id=parent_tweet["id"])
