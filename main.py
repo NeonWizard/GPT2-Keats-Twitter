@@ -23,6 +23,7 @@ class Bot:
 
 	def generate_post(self):
 		print("Generating post... ", end=""); sys.stdout.flush()
+
 		response = gpt2.generate(
 			self.gpt2_sess,
 			include_prefix=False,
@@ -33,19 +34,40 @@ class Bot:
 			top_k=40,
 			truncate="<|endoftext|>"
 		)[0]
-		print(response)
 
 		# split all generated lines by newline into array, discarding last leftovers after last newline
-		lines = response.split("\n")[:-1]
+		response_split = response.split("\n")[:-1]
+
+		# clean out empty lines and split too long lines into two
+		lines = []
+		for line in response_split:
+			if not line or line.isspace(): continue
+			if len(line) > 280:
+				lines.append(line[:280])
+				lines.append(line[280:])
+			else:
+				lines.append(line)
+
+		# generation failure, try again
+		if not lines: return False
+
+		# save generated poem to master file to read through later
+		with open("generated-poems.txt", 'a') as f:
+			poem = "\n".join(lines)
+			print(poem)
+			f.write(poem+"\n---------------\n")
 
 		# separate poem into 280 or less character tweets
 		tweets = [[]]
+		line_number = 0
 		for line in lines:
-			if not line or line.isspace(): continue
+			line_number += 1
 			if len("\n".join(tweets[-1]))+len(line) < 280:
 				tweets[-1].append(line)
 			else:
 				tweets.append([line])
+
+			if line_number >= 8 and line[-1] in [".", "!", "?"]: break
 
 		# post each tweet and chain into a thread
 		# TODO: rare error where twitter post is too long, investigate further.
@@ -56,10 +78,11 @@ class Bot:
 			parent_tweet = self.twitter.update_status(status=tweet_content, in_reply_to_status_id=parent_tweet["id"])
 
 		print("Generated and posted.")
+		return True
 
 def main():
 	client = Bot()
-	client.generate_post()
+	while not client.generate_post(): pass
 
 if __name__ == "__main__":
 	main()
