@@ -2,6 +2,9 @@
 from twython import Twython, TwythonError
 import gpt_2_simple as gpt2
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import sys
 
