@@ -1,0 +1,8 @@
+[Unit]
+Description=John Keats Twitter Poetry Bot
+OnFailure=unit-status-telegram@%n.service
+
+[Service]
+ExecStart=$(which python3.7) main.py
+Type=oneshot
+WorkingDirectory=$(pwd)

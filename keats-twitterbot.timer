@@ -1,0 +1,9 @@
+[Unit]
+Description=Run the Keats Twitter Bot every day
+
+[Timer]
+Unit=keats-twitterbot.service
+OnCalendar=20:00
+
+[Install]
+WantedBy=timers.target
