@@ -61,19 +61,19 @@ class Bot:
 			f.write(poem+"\n---------------\n")
 
 		# separate poem into 280 or less character tweets
-		tweets = [[]]
-		line_number = 0
-		for line in lines:
-			line_number += 1
-			if len("\n".join(tweets[-1]))+len(line) < 280:
-				tweets[-1].append(line)
+		tweets = []
+		buffer = ""
+		for line_num, line in enumerate(lines):
+			if len(buffer) + len(line) + 1 < 280:
+				buffer += "\n" + line
 			else:
-				tweets.append([line])
+				tweets.append(buffer)
 
-			if line_number >= 8 and line[-1] in [".", "!", "?"]: break
+			# if we have 8 lines so far and we have a line that ends with punctuation,
+			# terminate tweet here
+			if line_num >= 8 and line[-1] in [".", "!", "?"]: break
 
 		# post each tweet and chain into a thread
-		# TODO: rare error where twitter post is too long, investigate further.
 		tweet_content = "\n".join(tweets.pop(0))
 		parent_tweet = self.twitter.update_status(status=tweet_content)
 		for tweet in tweets:
