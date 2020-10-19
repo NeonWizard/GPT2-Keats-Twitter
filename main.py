@@ -68,6 +68,7 @@ class Bot:
 				buffer += "\n" + line
 			else:
 				tweets.append(buffer)
+				buffer = ""
 
 			# if we have 8 lines so far and we have a line that ends with punctuation,
 			# terminate tweet here
