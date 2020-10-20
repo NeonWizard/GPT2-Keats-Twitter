@@ -68,18 +68,18 @@ class Bot:
 				buffer += "\n" + line
 			else:
 				tweets.append(buffer)
-				buffer = ""
+				buffer = "@{} ".format(self.twitter_screen_name)
 
 			# if we have 8 lines so far and we have a line that ends with punctuation,
 			# terminate tweet here
 			if line_num >= 8 and line[-1] in [".", "!", "?"]: break
+		if buffer: tweets.append(buffer)
 
 		# post each tweet and chain into a thread
-		tweet_content = "\n".join(tweets.pop(0))
-		parent_tweet = self.twitter.update_status(status=tweet_content)
+		tweet = tweets.pop(0)
+		parent_tweet = self.twitter.update_status(status=tweet)
 		for tweet in tweets:
-			tweet_content = "@{} {}".format(self.twitter_screen_name, "\n".join(tweet))
-			parent_tweet = self.twitter.update_status(status=tweet_content, in_reply_to_status_id=parent_tweet["id"])
+			parent_tweet = self.twitter.update_status(status=tweet, in_reply_to_status_id=parent_tweet["id"])
 
 		print("Generated and posted.")
 		return True
