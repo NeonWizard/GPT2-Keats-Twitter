@@ -39,15 +39,29 @@ class Bot:
 		)[0]
 
 		# split all generated lines by newline into array, discarding last leftovers after last newline
-		response_split = response.split("\n")[:-1]
+		response_split = response.split("\n")
+		if len(response_split) > 1:
+			response_split = response_split[:-1]
 
 		# clean out empty lines and split too long lines into two
 		lines = []
 		for line in response_split:
 			if not line or line.isspace(): continue
 			if len(line) > 280:
-				lines.append(line[:280])
-				lines.append(line[280:])
+				buffer = ""
+				while line:
+					if len(buffer) >= 240:
+						lines.append(buffer)
+						buffer = ""
+
+					split = line.split(" ", 1)
+					if len(split) == 1:
+						word, line = split[0], ""
+					else:
+						word, line = line.split(" ", 1)
+					buffer += word + " "
+
+				if buffer: lines.append(buffer)
 			else:
 				lines.append(line)
 
@@ -68,7 +82,7 @@ class Bot:
 				buffer += "\n" + line
 			else:
 				tweets.append(buffer)
-				buffer = "@{} ".format(self.twitter_screen_name)
+				buffer = "@{} ".format(self.twitter_screen_name) + line
 
 			# if we have 8 lines so far and we have a line that ends with punctuation,
 			# terminate tweet here
