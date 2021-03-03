@@ -1,4 +1,8 @@
 # John Keats GPT-2 Twitter Bot
+![CodeQL Analysis](https://img.shields.io/github/workflow/status/NeonWizard/GPT2-Keats-Twitter/CodeQL?label=CodeQL&logo=github)
+![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/NeonWizard/GPT2-Keats-Twitter)
+![GitHub License](https://img.shields.io/github/license/NeonWizard/GPT2-Keats-Twitter)
+
 A twitter bot that generates and posts new poems from a GPT-2 network trained on John Keats.
 
 # Writeup
