@@ -1,4 +1,7 @@
 # John Keats GPT-2 Twitter Bot
+A twitter bot that generates and posts new poems from a GPT-2 network trained on John Keats.
+
+# Writeup
 ## Find and download poem files
 It took a few tries to find a repository of Keat's poems that could easily be automatically scraped. I first found some PDFs and wrote a PDF scraper, but the library I used wouldn't pull the text in any usable manner. I ended up finding a site with quite a lot of poems actually, all in plain-text in HTML.
 
@@ -22,7 +25,7 @@ I uploaded my master training text file to the Collab instance and downloaded th
 
 -----
 
-## Installation
+# Installation
 1. Clone the repo into your system and `cd` into it.
 2. Ensure the proper GPT2 models are on your system, and then symlink the directory with `ln -s <path_to_models> models`.
 3. Copy `default.env` to `.env` and fill out the fields.
