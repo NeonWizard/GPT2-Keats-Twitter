@@ -1,42 +1,63 @@
 # -*- coding: utf-8 -*-
 from twython import Twython, TwythonError
-import gpt_2_simple as gpt2
-
-from dotenv import load_dotenv
-load_dotenv()
-
-import os
 import sys
+import requests
+import time
+
+from config import CONFIG
 
 class Bot:
 	def __init__(self):
 		# -- initialize twython
 		self.twitter = Twython(
-			os.environ["CONSUMER_KEY"],
-			os.environ["CONSUMER_SECRET"],
-			os.environ["ACCESS_TOKEN"],
-			os.environ["ACCESS_TOKEN_SECRET"]
+			CONFIG["TWITTER_CONSUMER_KEY"],
+			CONFIG["TWITTER_CONSUMER_SECRET"],
+			CONFIG["TWITTER_ACCESS_TOKEN"],
+			CONFIG["TWITTER_ACCESS_TOKEN_SECRET"],
 		)
 		self.twitter_screen_name = self.twitter.verify_credentials()["screen_name"]
 
-		# -- initialize gpt2
-		self.gpt2_model_name = os.environ["GPT2_MODEL_NAME"]
-		self.gpt2_sess = gpt2.start_tf_sess()
-		gpt2.load_gpt2(self.gpt2_sess, model_name=self.gpt2_model_name)
+		# -- initialize ODIN
+		response = requests.post("https://odin.deadtired.me/api/auth", json={
+			"username": CONFIG["ODIN_USER"],
+			"password": CONFIG["ODIN_PASS"],
+		})
+		try:
+			data = response.json()
+			self._odin_token = data["token"]
+		except:
+			print("ERROR:")
+			print(response.text)
+			sys.exit(1)
+
+	def fetch_generated_text(self):
+		response = requests.post(f"https://odin.deadtired.me/api/models/{CONFIG['ODIN_MODEL']}",
+			json={
+				"include_prefix": False,
+				"length": 183,
+				"temperature": 1.0,
+				"top_k": 40,
+				"truncate": "<|endoftext|>",
+			},
+			headers={
+				"X-API-KEY": self._odin_token,
+			},
+		)
+
+		try:
+			data = response.json()
+			content = data["data"][0]
+		except:
+			print("ERROR GENERATING TEXT:")
+			print(response.text)
+			sys.exit(1)
+
+		return content
 
 	def generate_post(self):
 		print("Generating post... ", end=""); sys.stdout.flush()
 
-		response = gpt2.generate(
-			self.gpt2_sess,
-			include_prefix=False,
-			model_name=self.gpt2_model_name,
-			return_as_list=True,
-			length=183,
-			temperature=1.0,
-			top_k=40,
-			truncate="<|endoftext|>"
-		)[0]
+		response = self.fetch_generated_text()
 
 		# split all generated lines by newline into array, discarding last leftovers after last newline
 		response_split = response.split("\n")
@@ -100,7 +121,8 @@ class Bot:
 
 def main():
 	client = Bot()
-	while not client.generate_post(): pass
+	while not client.generate_post():
+		time.sleep(1)
 
 if __name__ == "__main__":
 	main()
